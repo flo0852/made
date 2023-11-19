@@ -2,7 +2,4 @@
 /data/*
 !/data/.gitkeep
 /exercises/airports.sqlite
-/project/allocation.sqlite
-/project/areaInfos.sqlite
-/project/cars.sqlite
-/project/trainStations.sqlite
+/project/*.sqlite
