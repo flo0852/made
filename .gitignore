@@ -2,4 +2,4 @@
 /data/*
 !/data/.gitkeep
 /exercises/airports.sqlite
-/project/*.sqlite
+/data/*.sqlite
