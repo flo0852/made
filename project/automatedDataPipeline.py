@@ -1,8 +1,6 @@
 import pandas
 from sqlalchemy import BIGINT, REAL, TEXT
 
-# TODO: dTypes
-
 def getTrainStationsGroupedByPLZ():
     dtype_trainStations = {
         'ZIP code': BIGINT
@@ -39,15 +37,17 @@ def getCars():
         'Type of county': TEXT,
         'Number of PKWs': BIGINT,
     }
-    carsColNames = ['County name', 'Type of county', 'Number of PKWs']
+    carsColNames = ['County name', 'Number of PKWs']
     cars = pandas.read_csv(filepath_or_buffer='https://www-genesis.destatis.de/genesis/downloads/00/tables/46251-0020_00.csv',
-                           sep=r',|;', encoding='latin-1', skiprows=6, usecols=[2, 3, 4], names=carsColNames, engine='python') # also , as separator to separate the type of the county (Landkreis or kreisfreie Stadt)
+                           sep=r';', encoding='latin-1', skiprows=6, usecols=[2, 7], names=carsColNames, engine='python') # also , as separator to separate the type of the county (Landkreis or kreisfreie Stadt)
     cars.dropna(inplace=True) # Drop null values
     cars.drop(cars[cars['Number of PKWs'] == '-'].index, inplace=True) # remove rows without data for number of PKWs
-    cars['Type of county'].replace(' kreisfreie Stadt', 'kreisfreie Stadt',
-                              inplace=True, regex=True) # remove space for join
-    cars['Type of county'].replace(' Landkreis', 'Landkreis',
-                              inplace=True, regex=True) # remove space for join
+    cars['Type of county'] = 'kreisfreie Stadt' # extra column for type of county 
+    mask2 = cars['County name'].str.contains(r', Landkreis') # extract type of county if it's 'Landkreis'
+    cars.loc[mask2, 'Type of county'] = 'Landkreis' # mark type of county in extra column
+    cars['County name'].replace(', Landkreis', '', inplace=True, regex=True) # remove ', Landkreis' from the county name for join
+    cars['County name'].replace(', kreisfreie Stadt', '', inplace=True, regex=True) # remove ', kreisfreie Stadt' from the county name for join
+    
     cars.to_sql(name='cars', con='sqlite:///../data/cars.sqlite',
                 if_exists='replace', index=False, dtype=dtype_cars)
     return cars
@@ -67,9 +67,12 @@ def getAllocation():
     
     allocation['County name'] = allocation['County name'].fillna(allocation['Town']) # if cell for 'Landkreis' is null, it's a "kreisfreie Stadt", so the name of the city can be taken as 'Landkreis' for the join
     allocation['Type of county'] = 'kreisfreie Stadt' # mark type of county in extra column
-    mask = allocation['County name'].str.contains(r'Landkreis') # extract type of county if it's 'Landkreis'
-    allocation.loc[mask, 'Type of county'] = 'Landkreis' # mark type of county in extra column
+    mask1 = allocation['County name'].str.contains(r'Landkreis') # extract type of county if it's 'Landkreis'
+    allocation.loc[mask1, 'Type of county'] = 'Landkreis' # mark type of county in extra column
     allocation['County name'].replace('Landkreis ', '', inplace=True, regex=True) # remove 'Landkreis ' from the county name for join
+    mask2 = allocation['County name'].str.contains(r'Kreis ') # extract type of county if it's 'Kreis ' to 'Landkreis' in extra column
+    allocation.loc[mask2, 'Type of county'] = 'Landkreis' # mark type of county in extra column
+    allocation['County name'].replace('Kreis ', '', inplace=True, regex=True) # remove 'Kreis ' from the county name for join
 
     allocation.to_sql(name='allocation', con='sqlite:///../data/allocation.sqlite',
                       if_exists='replace', index=False, dtype=dtype_allocation)
@@ -82,8 +85,6 @@ def createTablesFromCSV():
 
     areaInfosWithTrainStations = pandas.merge(
         areaInfos, trainStationsGrouped, left_on='ZIP code', right_on='index').drop('index', axis=1)
-    # areaInfosWithTrainStations.to_sql(name='areaInfosWithTrainStations', con='sqlite:///areaInfosWithTrainStations.sqlite',
-    #                                   if_exists='replace', index=False)
 
     cars = getCars()
 
@@ -91,20 +92,9 @@ def createTablesFromCSV():
 
     areaInfosWithTrainStationsWithKreis = pandas.merge(
         areaInfosWithTrainStations, allocation, left_on='ZIP code', right_on='ZIP code')
-    # areaInfosWithTrainStationsWithKreis.to_sql(name='areaInfosWithTrainStationsWithKreis', con='sqlite:///../data/areaInfosWithTrainStationsWithKreis.sqlite',
-    #                                            if_exists='replace', index=False)
-    # dType_areaInfosWithTrainStationsWithKreisGrouped = {
-    #     'County name': TEXT,
-    #     'Type of county': TEXT,
-    #     'Number of residents': BIGINT,
-    #     'Square km': REAL,
-    #     'Number of train stations': BIGINT,
-    # }
+
     areaInfosWithTrainStationsWithKreisGrouped = areaInfosWithTrainStationsWithKreis.groupby(
         ['County name', 'Type of county']).sum().reset_index().drop('ZIP code', axis=1)
-    # areaInfosWithTrainStationsWithKreisGrouped.to_sql(name='areaInfosWithTrainStationsWithKreisGrouped',
-    #                                                   con='sqlite:///../data/areaInfosWithTrainStationsWithKreisGrouped.sqlite', if_exists='replace', index=False, dtype=dType_areaInfosWithTrainStationsWithKreisGrouped)
-
 
     dType_final = {
         'County name': TEXT,
