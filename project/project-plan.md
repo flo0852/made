@@ -4,11 +4,11 @@
 Correlation of train stations and cars
 
 ## Main Question
-How does the number of train stations per qm in a municipality affect the number of cars per 1000 residents in this municipality?
+How does the number of train stations per qm in a county affect the number of cars per 1000 residents in this county?
 
 ## Description
 In days of global climate change, it gets more and more important to go climate friendly. One possibility to do this is by using the train instead of the car. Or in the best case not even having a car.
-So the aim of this project is to find out, whether the number of train stations per qkm has an influence on the number of cars per 1000 residents in this municipality.
+So the aim of this project is to find out, whether the number of train stations per qkm has an influence on the number of cars per 1000 residents in this county.
 So if the answer to this question would be true, it could be a possibility to build more train stations in order to decrease the number of cars and so become more climate friendly.
 
 ## Datasources
@@ -26,20 +26,20 @@ Dataset which lists the existing train stations in Germany with the correspondin
 * Data Type: CSV
 
 Dataset which contains the number of residents and the area in qm per zip code.
-### Datasource3: Number of cars per municipality
+### Datasource3: Number of cars per county
 * Metadata URL: https://mobilithek.info/offers/-7245790047701635178
 * Data URL: https://www-genesis.destatis.de/genesis/downloads/00/tables/46251-0020_00.csv
 * Data Type: CSV
 
-Dataset which contains the number of cars per municipality.
+Dataset which contains the number of cars per county.
 
-### Datasource4: Allocation table for zip code and municipality 
+### Datasource4: Allocation table for zip code and county 
 * Metadata URL: https://www.suche-postleitzahl.org/downloads
 * Data URL: https://downloads.suche-postleitzahl.org/v2/public/zuordnung_plz_ort.csv
 * Data Type: CSV
 
-Dataset which shows, which zip code belongs to which municipality.
-This dataset is needed, because the number of cars is listed by municipality, but the train stations, number of residents and area ist listed by zip code. 
+Dataset which shows, which zip code belongs to which county.
+This dataset is needed, because the number of cars is listed by county, but the train stations, number of residents and area ist listed by zip code. 
 
 ## Work Packages
 
