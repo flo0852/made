@@ -11,7 +11,7 @@ def getTrainStationsGroupedByPLZ():
     
     trainStations.dropna(inplace=True) #drop null values
     trainStationsGrouped = trainStations['ZIP code'].value_counts(
-    ).reset_index(name='Number of train Stations')
+    ).reset_index(name='Number of train stations')
     trainStationsGrouped.to_sql(name='trainStationsGrouped',
                                 con='sqlite:///../data/trainStationsGrouped.sqlite', if_exists='replace', index=False, dtype=dtype_trainStations)
     return trainStationsGrouped
@@ -106,6 +106,8 @@ def createTablesFromCSV():
     }
     final = pandas.merge(areaInfosWithTrainStationsWithKreisGrouped,
                          cars, left_on=['County name', 'Type of county'], right_on=['County name', 'Type of county'])
+    final['Train Stations per qkm'] = final['Number of train stations'] / final['Square km']
+    final['Number of PKWs per 1000 residents'] = final['Number of PKWs'].astype('int32') / final['Number of residents'] *1000
     final.to_sql(name='final', con='sqlite:///../data/final.sqlite',
                  if_exists='replace', index=False, dtype=dType_final)
 
