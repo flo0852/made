@@ -84,7 +84,7 @@ def createTablesFromCSV():
     areaInfos = getAreaInfos()
 
     areaInfosWithTrainStations = pandas.merge(
-        areaInfos, trainStationsGrouped, left_on='ZIP code', right_on='index').drop('index', axis=1)
+        areaInfos, trainStationsGrouped, how='left', left_on='ZIP code', right_on='index').drop('index', axis=1)
 
     cars = getCars()
 
@@ -92,10 +92,13 @@ def createTablesFromCSV():
 
     areaInfosWithTrainStationsWithKreis = pandas.merge(
         areaInfosWithTrainStations, allocation, left_on='ZIP code', right_on='ZIP code')
-
+    areaInfosWithTrainStationsWithKreis.to_sql(name='areaInfosWithTrainStationsWithKreis', con='sqlite:///../data/areaInfosWithTrainStationsWithKreis.sqlite', 
+                 if_exists='replace', index=False)
+    
     areaInfosWithTrainStationsWithKreisGrouped = areaInfosWithTrainStationsWithKreis.groupby(
         ['County name', 'Type of county']).sum().reset_index().drop('ZIP code', axis=1)
-
+    areaInfosWithTrainStationsWithKreisGrouped.to_sql(name='areaInfosWithTrainStationsWithKreisGrouped', con='sqlite:///../data/areaInfosWithTrainStationsWithKreisGrouped.sqlite',
+                 if_exists='replace', index=False)
     dType_final = {
         'County name': TEXT,
         'Type of county': TEXT,
