@@ -10,18 +10,7 @@ pipeline TrainStopsPipeline{
             NoEmptyCellsConstraint,
         ];
     }
-
-    constraint NoEmptyCellsConstraintInteger oftype RangeConstraint {
-        lowerBound: -9007199254740991;
-        upperBound: 9007199254740991;
-    }
-
-    valuetype NoEmptyCellsInteger oftype integer{
-        constraints: [
-            NoEmptyCellsConstraintInteger,
-        ];
-    }
-
+    
     constraint IFOPTFormatConstraint oftype RegexConstraint {
         regex: /^.{2}:[0-9]*:[0-9]*(:[0-9]*)?$/;
     }
@@ -79,7 +68,7 @@ pipeline TrainStopsPipeline{
     block TrainStopsTableInterpreter oftype TableInterpreter {
         header: true;
         columns: [
-            "EVA_NR" oftype NoEmptyCellsInteger,
+            "EVA_NR" oftype integer,
             "DS100" oftype NoEmptyCells,
             "IFOPT" oftype IFOPTFormat,
             "NAME" oftype NoEmptyCells,
@@ -87,7 +76,7 @@ pipeline TrainStopsPipeline{
             "Laenge" oftype GeopgraphicCoordinate,
             "Breite" oftype GeopgraphicCoordinate,
             "Betreiber_Name" oftype NoEmptyCells,
-            "Betreiber_Nr" oftype NoEmptyCellsInteger,
+            "Betreiber_Nr" oftype integer,
         ];
     }
 
