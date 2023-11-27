@@ -1,0 +1,98 @@
+pipeline TrainStopsPipeline{
+
+    constraint NoEmptyCellsConstraint oftype LengthConstraint {
+        minLength: 1;
+        maxLength: 9007199254740991;
+    }
+
+    valuetype NoEmptyCells oftype text{
+        constraints: [
+            NoEmptyCellsConstraint,
+        ];
+    }
+
+    constraint NoEmptyCellsConstraintInteger oftype RangeConstraint {
+        lowerBound: -9007199254740991;
+        upperBound: 9007199254740991;
+    }
+
+    valuetype NoEmptyCellsInteger oftype integer{
+        constraints: [
+            NoEmptyCellsConstraintInteger,
+        ];
+    }
+
+    constraint IFOPTFormatConstraint oftype RegexConstraint {
+        regex: /^.{2}:[0-9]*:[0-9]*(:[0-9]*)?$/;
+    }
+
+    valuetype IFOPTFormat oftype text {
+        constraints: [
+            IFOPTFormatConstraint,
+        ];
+    }
+
+    constraint VerkehrConstraint oftype AllowlistConstraint {
+        allowlist: ["FV", "RV", "nur DPN"];
+    }
+
+    valuetype Verkehr oftype text {
+        constraints: [
+            VerkehrConstraint,
+        ];
+    }
+    
+    constraint GeopgraphicCoordinateConstraint oftype RangeConstraint {
+        lowerBound: -90;
+        upperBound: 90;
+    }
+
+    valuetype GeopgraphicCoordinate oftype decimal {
+        constraints: [
+            GeopgraphicCoordinateConstraint,
+        ];
+    }
+
+    TrainStopsHttpExtractor 
+    -> TrainStopsTextFileInterpreter
+    -> TrainStopsCSVInterpreter
+    -> TrainStopsColumnDeleter
+    -> TrainStopsTableInterpreter
+    -> TrainStopsSQLiteLoader;
+
+    block TrainStopsHttpExtractor oftype HttpExtractor{
+        url: "https://download-data.deutschebahn.com/static/datasets/haltestellen/D_Bahnhof_2020_alle.CSV";
+    }
+
+    block TrainStopsTextFileInterpreter oftype TextFileInterpreter {
+    }
+
+    block TrainStopsCSVInterpreter oftype CSVInterpreter {
+        delimiter: ";";
+    }
+
+    //Drop column "Status"
+    block TrainStopsColumnDeleter oftype ColumnDeleter {
+        delete: [column J];
+    }
+
+    block TrainStopsTableInterpreter oftype TableInterpreter {
+        header: true;
+        columns: [
+            "EVA_NR" oftype NoEmptyCellsInteger,
+            "DS100" oftype NoEmptyCells,
+            "IFOPT" oftype IFOPTFormat,
+            "NAME" oftype NoEmptyCells,
+            "Verkehr" oftype Verkehr,
+            "Laenge" oftype GeopgraphicCoordinate,
+            "Breite" oftype GeopgraphicCoordinate,
+            "Betreiber_Name" oftype NoEmptyCells,
+            "Betreiber_Nr" oftype NoEmptyCellsInteger,
+        ];
+    }
+
+    block TrainStopsSQLiteLoader oftype SQLiteLoader {
+		table: "TrainStops";
+		file: "./trainStops.sqlite";
+	}
+}
