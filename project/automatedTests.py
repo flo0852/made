@@ -1,3 +1,4 @@
+import os
 import sqlite3
 import pandas as pd
 import automatedDataPipeline
@@ -23,8 +24,10 @@ def test_DataFrames():
 
 def test_system():
     automatedDataPipeline.createTablesFromCSV()
-    conn = sqlite3.connect("../data/final.sqlite")
+    path = "../data/final.sqlite"
+    conn = sqlite3.connect(path)
     final = pd.read_sql("SELECT * FROM final", conn)
+    assert os.path.isfile(path) #check if file exists
     assert len(final.columns) == (8)
     assert len(final) > 0  # assert not empty
     conn.close
