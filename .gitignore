@@ -2,3 +2,4 @@
 /data/*
 !/data/.gitkeep
 /exercises/*.sqlite
+/project/__pycache__
