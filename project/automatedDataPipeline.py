@@ -103,6 +103,8 @@ def createTablesFromCSV():
         'Square km': REAL,
         'Number of train stations': BIGINT,
         'Number of PKWs': BIGINT,
+        'Number of PKWs per 1000 residents': REAL,
+        'Train Stations per qkm': REAL,
     }
     final = pandas.merge(areaInfosWithTrainStationsWithKreisGrouped,
                          cars, left_on=['County name', 'Type of county'], right_on=['County name', 'Type of county'])
