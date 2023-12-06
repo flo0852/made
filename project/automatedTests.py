@@ -35,6 +35,11 @@ def test_system():
     assert len(final.columns) == (8)
     assert len(final) > 0  # assert not empty
     assert final.isnull().values.any() == False # no null values
+    assert "Schwabach" in final['County name'].values
+    rowDataFrame = final.loc[final["County name"] == 'Schwabach']
+    assert len(rowDataFrame) == 1
+    row = rowDataFrame.iloc[0]
+    assert row['Type of county'] == "kreisfreie Stadt"
     conn.close
 
 
