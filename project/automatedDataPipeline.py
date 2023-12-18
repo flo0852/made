@@ -133,7 +133,7 @@ def createTablesFromData(trainStationsData, carsData, areaInfosData, allocationD
         'Train Stations per qkm': REAL,
     }
     final = pandas.merge(areaInfosWithTrainStationsWithKreisGrouped,
-                         cars, left_on=['County name', 'Type of county'], right_on=['County name', 'Type of county'])
+                         cars, left_on=['County name', 'Type of county'], right_on=['County name', 'Type of county']).drop('Town', axis=1)
 
     final['Train Stations per qkm'] = final['Number of train stations'] / \
         final['Square km']
