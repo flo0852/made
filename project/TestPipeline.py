@@ -142,6 +142,8 @@ def test_systemMock():
         ['Nürnberg', 'kreisfreie Stadt', 40000, 20, 1.0, 10000.0, 0.05, 250],
         ['Schwabach', 'kreisfreie Stadt', 10000, 5, 3.0, 10000.0, 0.60, 1000],
     ], columns=['County name', 'Type of county', 'Number of residents', 'Square km', 'Number of train stations', 'Number of PKWs', 'Train Stations per qkm', 'Number of PKWs per 1000 residents'])
+    print(expected)
+    print(final)
     assert expected.equals(final)
 
 
