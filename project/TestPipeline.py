@@ -93,6 +93,12 @@ def test_transformTrainStationsData():
     ], columns=['index', 'Number of train stations'])
     trainStations = automatedDataPipeline.transformTrainStationsData(
         trainStationsMockData.copy())
+    print('Mock: ')
+    print(trainStationsMockData)
+    print('Act: ')
+    print(trainStations)
+    print('Exp: ')
+    print(expected)
     assert len(trainStations.columns) == 2  # number of columns
     assert len(trainStations) == 4  # number of rows
     assert trainStations.isnull().values.any() == False  # no null values
