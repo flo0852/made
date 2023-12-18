@@ -8,11 +8,10 @@ def getTrainStationsData():
         filepath_or_buffer='https://download-data.deutschebahn.com/static/datasets/stationsdaten/DBSuS-Uebersicht_Bahnhoefe-Stand2020-03.csv', sep=";", usecols=[8], names=trainStationsColNames, skiprows=[0])
 
 
-def transformTrainStationsData(trainStationsData):
+def transformTrainStationsData(trainStationsData: pandas.DataFrame):
     trainStationsData.dropna(inplace=True)  # drop null values
     trainStationsGrouped = trainStationsData['ZIP code'].value_counts(
-    ).reset_index(name='Number of train stations')
-
+    ).reset_index(name='Number of train stations').rename(columns={"index": "ZIP code"})
     dtype_trainStationsGroupedData = {
         'Number of train stations': BIGINT
     }
@@ -112,7 +111,7 @@ def transformAllocationData(allocationData):
 def createTablesFromData(trainStationsData, carsData, areaInfosData, allocationData):
     trainStationsGrouped = transformTrainStationsData(trainStationsData)
     areaInfosWithTrainStations = pandas.merge(
-        areaInfosData, trainStationsGrouped, how='left', left_on='ZIP code', right_on='index').drop('index', axis=1)
+        areaInfosData, trainStationsGrouped, how='left', left_on='ZIP code', right_on='ZIP code')
 
     cars = transformCarsData(carsData)
 
@@ -152,43 +151,6 @@ def initiatePipeline():
     allocationData = getAllocationData()
     createTablesFromData(trainStationsData, carsData,
                          areaInfosData, allocationData)
-
-# def createTablesFromCSV():
-#     trainStationsGrouped = transformTrainStationsData(getTrainStationsData())
-#     areaInfos = getAreaInfos()
-
-#     areaInfosWithTrainStations = pandas.merge(
-#         areaInfos, trainStationsGrouped, how='left', left_on='ZIP code', right_on='index').drop('index', axis=1)
-
-#     cars = transformCarsData(getCarsData())
-
-#     allocation = transformAllocationData(getAllocationData())
-
-#     areaInfosWithTrainStationsWithKreis = pandas.merge(
-#         areaInfosWithTrainStations, allocation, left_on='ZIP code', right_on='ZIP code')
-
-#     areaInfosWithTrainStationsWithKreisGrouped = areaInfosWithTrainStationsWithKreis.groupby(
-#         ['County name', 'Type of county']).sum().reset_index().drop('ZIP code', axis=1)
-
-#     dType_final = {
-#         'County name': TEXT,
-#         'Type of county': TEXT,
-#         'Number of residents': BIGINT,
-#         'Square km': REAL,
-#         'Number of train stations': BIGINT,
-#         'Number of PKWs': BIGINT,
-#         'Number of PKWs per 1000 residents': REAL,
-#         'Train Stations per qkm': REAL,
-#     }
-#     final = pandas.merge(areaInfosWithTrainStationsWithKreisGrouped,
-#                          cars, left_on=['County name', 'Type of county'], right_on=['County name', 'Type of county'])
-#     final['Train Stations per qkm'] = final['Number of train stations'] / \
-#         final['Square km']
-#     final['Number of PKWs per 1000 residents'] = final['Number of PKWs'].astype(
-#         'int32') / final['Number of residents'] * 1000
-#     final.to_sql(name='final', con='sqlite:///../data/final.sqlite',
-#                  if_exists='replace', index=False, dtype=dType_final)
-
 
 if __name__ == '__main__':
     initiatePipeline()
