@@ -90,7 +90,7 @@ def test_transformTrainStationsData():
         [25541.0, 2],
         [25719.0, 1],
         [90453.0, 1],
-    ], columns=['index', 'Number of train stations'])
+    ], columns=['ZIP code', 'Number of train stations'])
     trainStations = automatedDataPipeline.transformTrainStationsData(
         trainStationsMockData.copy())
     print('Mock: ')
