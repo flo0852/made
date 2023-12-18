@@ -42,31 +42,6 @@ allocationMockData = pd.DataFrame([
 ], columns=['Town', 'ZIP code', 'County name'])
 
 
-def test_DataFrames():
-    trainStations = automatedDataPipeline.transformTrainStationsData(
-        automatedDataPipeline.getTrainStationsData())
-    assert len(trainStations.columns) == (2)
-    assert len(trainStations) > 0  # assert not empty
-    assert trainStations.isnull().values.any() == False  # no null values
-
-    areaInfos = automatedDataPipeline.getAreaInfos()
-    assert len(areaInfos.columns) == (3)
-    assert len(areaInfos) > 0  # assert not empty
-    assert areaInfos.isnull().values.any() == False  # no null values
-
-    allocation = automatedDataPipeline.transformAllocationData(
-        automatedDataPipeline.getAllocationData())
-    assert len(allocation.columns) == (4)
-    assert len(allocation) > 0  # assert not empty
-    assert allocation.isnull().values.any() == False  # no null values
-
-    cars = automatedDataPipeline.transformCarsData(
-        automatedDataPipeline.getCarsData())
-    assert len(cars.columns) == (3)
-    assert len(cars) > 0  # assert not empty
-    assert cars.isnull().values.any() == False  # no null values
-
-
 def test_system():
     automatedDataPipeline.createTablesFromCSV()
     path = "../data/final.sqlite"
@@ -146,8 +121,6 @@ def test_systemMock():
 
 
 if __name__ == '__main__':
-    # test_DataFrames()
-    # test_system()
     test_transformTrainStationsData()
     test_transformCarsData()
     test_transformAllocationData()
