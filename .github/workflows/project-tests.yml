@@ -23,5 +23,5 @@ jobs:
     # Run project tests
     - name: Project tests
       run: |
-        cd project
+        cd ./main/project
         ./tests.sh
