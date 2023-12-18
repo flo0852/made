@@ -152,5 +152,6 @@ def initiatePipeline():
     createTablesFromData(trainStationsData, carsData,
                          areaInfosData, allocationData)
 
+
 if __name__ == '__main__':
     initiatePipeline()
