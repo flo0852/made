@@ -14,7 +14,7 @@ def transformTrainStationsData(trainStationsData):
     ).reset_index(name='Number of train stations')
 
     dtype_trainStationsGroupedData = {
-        'ZIP code': BIGINT
+        'Number of train stations': BIGINT
     }
 
     trainStationsGrouped.to_sql(name='trainStationsGrouped',
@@ -22,7 +22,7 @@ def transformTrainStationsData(trainStationsData):
     return trainStationsGrouped
 
 
-def getAreaInfos():
+def getAreaInfosData():
     dtype_areaInfos = {
         'ZIP code': BIGINT,
         'Number of residents': BIGINT,
@@ -109,17 +109,14 @@ def transformAllocationData(allocationData):
     return allocationData
 
 
-def createTablesFromCSV():
-    trainStationsGrouped = transformTrainStationsData(getTrainStationsData())
-    areaInfos = getAreaInfos()
-
+def createTablesFromData(trainStationsData, carsData, areaInfosData, allocationData):
+    trainStationsGrouped = transformTrainStationsData(trainStationsData)
     areaInfosWithTrainStations = pandas.merge(
-        areaInfos, trainStationsGrouped, how='left', left_on='ZIP code', right_on='index').drop('index', axis=1)
+        areaInfosData, trainStationsGrouped, how='left', left_on='ZIP code', right_on='index').drop('index', axis=1)
 
-    cars = transformCarsData(getCarsData())
+    cars = transformCarsData(carsData)
 
-    allocation = transformAllocationData(getAllocationData())
-
+    allocation = transformAllocationData(allocationData)
     areaInfosWithTrainStationsWithKreis = pandas.merge(
         areaInfosWithTrainStations, allocation, left_on='ZIP code', right_on='ZIP code')
 
@@ -138,13 +135,60 @@ def createTablesFromCSV():
     }
     final = pandas.merge(areaInfosWithTrainStationsWithKreisGrouped,
                          cars, left_on=['County name', 'Type of county'], right_on=['County name', 'Type of county'])
+
     final['Train Stations per qkm'] = final['Number of train stations'] / \
         final['Square km']
     final['Number of PKWs per 1000 residents'] = final['Number of PKWs'].astype(
         'int32') / final['Number of residents'] * 1000
     final.to_sql(name='final', con='sqlite:///../data/final.sqlite',
                  if_exists='replace', index=False, dtype=dType_final)
+    return final
+
+
+def initiatePipeline():
+    trainStationsData = getTrainStationsData()
+    carsData = getCarsData()
+    areaInfosData = getAreaInfosData()
+    allocationData = getAllocationData()
+    createTablesFromData(trainStationsData, carsData,
+                         areaInfosData, allocationData)
+
+# def createTablesFromCSV():
+#     trainStationsGrouped = transformTrainStationsData(getTrainStationsData())
+#     areaInfos = getAreaInfos()
+
+#     areaInfosWithTrainStations = pandas.merge(
+#         areaInfos, trainStationsGrouped, how='left', left_on='ZIP code', right_on='index').drop('index', axis=1)
+
+#     cars = transformCarsData(getCarsData())
+
+#     allocation = transformAllocationData(getAllocationData())
+
+#     areaInfosWithTrainStationsWithKreis = pandas.merge(
+#         areaInfosWithTrainStations, allocation, left_on='ZIP code', right_on='ZIP code')
+
+#     areaInfosWithTrainStationsWithKreisGrouped = areaInfosWithTrainStationsWithKreis.groupby(
+#         ['County name', 'Type of county']).sum().reset_index().drop('ZIP code', axis=1)
+
+#     dType_final = {
+#         'County name': TEXT,
+#         'Type of county': TEXT,
+#         'Number of residents': BIGINT,
+#         'Square km': REAL,
+#         'Number of train stations': BIGINT,
+#         'Number of PKWs': BIGINT,
+#         'Number of PKWs per 1000 residents': REAL,
+#         'Train Stations per qkm': REAL,
+#     }
+#     final = pandas.merge(areaInfosWithTrainStationsWithKreisGrouped,
+#                          cars, left_on=['County name', 'Type of county'], right_on=['County name', 'Type of county'])
+#     final['Train Stations per qkm'] = final['Number of train stations'] / \
+#         final['Square km']
+#     final['Number of PKWs per 1000 residents'] = final['Number of PKWs'].astype(
+#         'int32') / final['Number of residents'] * 1000
+#     final.to_sql(name='final', con='sqlite:///../data/final.sqlite',
+#                  if_exists='replace', index=False, dtype=dType_final)
 
 
 if __name__ == '__main__':
-    createTablesFromCSV()
+    initiatePipeline()

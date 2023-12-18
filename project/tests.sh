@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 automatedTests.py
+python3 TestPipeline.py
