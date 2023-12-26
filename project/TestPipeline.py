@@ -6,7 +6,7 @@ trainStationsMockData = pd.DataFrame([
     [91126],
     [91126],
     [91126],
-    [None],
+    [None], 
     [25541],
     [25541],
     [25719],

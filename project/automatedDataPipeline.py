@@ -12,26 +12,13 @@ def transformTrainStationsData(trainStationsData: pandas.DataFrame):
     trainStationsData.dropna(inplace=True)  # drop null values
     trainStationsGrouped = trainStationsData['ZIP code'].value_counts(
     ).reset_index(name='Number of train stations').rename(columns={"index": "ZIP code"})
-    dtype_trainStationsGroupedData = {
-        'Number of train stations': BIGINT
-    }
-
-    trainStationsGrouped.to_sql(name='trainStationsGrouped',
-                                con='sqlite:///../data/trainStationsGrouped.sqlite', if_exists='replace', index=False, dtype=dtype_trainStationsGroupedData)
     return trainStationsGrouped
 
 
 def getAreaInfosData():
-    dtype_areaInfos = {
-        'ZIP code': BIGINT,
-        'Number of residents': BIGINT,
-        'Square km': REAL
-    }
     areaInfosColNames = ['ZIP code', 'Number of residents', 'Square km']
     areaInfos = pandas.read_csv(
         filepath_or_buffer='https://downloads.suche-postleitzahl.org/v2/public/plz_einwohner.csv', sep=",", usecols=[0, 2, 3], names=areaInfosColNames, skiprows=[0])
-    areaInfos.to_sql(name='areaInfos', con='sqlite:///../data/areaInfos.sqlite',
-                     if_exists='replace', index=False, dtype=dtype_areaInfos)
     return areaInfos
 
 
@@ -58,15 +45,6 @@ def transformCarsData(carsData):
     # remove ', kreisfreie Stadt' from the county name for join
     carsData['County name'].replace(
         ', kreisfreie Stadt', '', inplace=True, regex=True)
-
-    dtype_carsData = {
-        'County name': TEXT,
-        'Type of county': TEXT,
-        'Number of PKWs': BIGINT,
-    }
-
-    carsData.to_sql(name='cars', con='sqlite:///../data/cars.sqlite',
-                    if_exists='replace', index=False, dtype=dtype_carsData)
     return carsData
 
 
@@ -97,14 +75,6 @@ def transformAllocationData(allocationData):
     allocationData['County name'].replace(
         'Kreis ', '', inplace=True, regex=True)
 
-    dtype_allocationData = {
-        'Town': TEXT,
-        'ZIP code': BIGINT,
-        'County name': TEXT,
-        'Type of county': TEXT,
-    }
-    allocationData.to_sql(name='allocation', con='sqlite:///../data/allocation.sqlite',
-                          if_exists='replace', index=False, dtype=dtype_allocationData)
     return allocationData
 
 
