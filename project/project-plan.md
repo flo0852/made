@@ -39,7 +39,7 @@ Dataset which contains the number of cars per county.
 * Data Type: CSV
 
 Dataset which shows, which zip code belongs to which county.
-This dataset is needed, because the number of cars is listed by county, but the train stations, number of residents and area ist listed by zip code. 
+This dataset is needed, because the number of cars is listed by county, but the train stations, number of residents and area is listed by zip code. 
 
 ## Work Packages
 
