@@ -1,0 +1,115 @@
+pipeline Exercise4Pipeline{
+
+    constraint PositiveValueConstraint oftype RangeConstraint {
+        lowerBound: 1;
+        lowerBoundInclusive: true;
+    }
+
+    valuetype PositiveInteger oftype integer{
+        constraints: [
+            PositiveValueConstraint,
+        ];
+    }
+
+    constraint MonthConstraint oftype RangeConstraint {
+        lowerBound: 1;
+        lowerBoundInclusive: true;
+        upperBound: 12;
+        upperBoundInclusive: true;
+    }
+
+    valuetype Month oftype integer{
+        constraints: [
+            MonthConstraint,
+        ];
+    }    
+    
+    constraint CelsiusConstraint oftype RangeConstraint {
+        lowerBound: -273.15;
+        lowerBoundInclusive: true;
+    }
+
+    valuetype Celsius oftype decimal{
+        constraints: [
+            CelsiusConstraint,
+        ];
+    }
+
+    constraint JaNeinConstraint oftype AllowlistConstraint {
+        allowlist: ["Ja", "Nein"];
+    }
+
+    valuetype JaNein oftype text{
+        constraints: [
+            JaNeinConstraint,
+        ];
+    }
+
+    Exercise4HttpExtractor 
+    -> Exercise4ArchiveInterpreter
+    -> Exercise4FilePicker
+    -> Exercise4TextFileInterpreter
+    -> Exercise4CSVInterpreter
+    -> Exercise4ColumnDeleter
+    -> Exercise4TableInterpreter
+    -> Exercise4CelsiusToFahrenheitTransformer
+    -> Exercise4CelsiusToFahrenheitTransformerForBattery
+    -> Exercise4SQLiteLoader;
+
+    block Exercise4HttpExtractor oftype HttpExtractor{
+        url: "https://www.mowesta.com/data/measure/mowesta-dataset-20221107.zip";
+    }
+
+    block Exercise4ArchiveInterpreter oftype ArchiveInterpreter {
+        archiveType: "zip";
+    }
+
+    block Exercise4FilePicker oftype FilePicker {
+        path: "/data.csv";
+    }
+
+    block Exercise4TextFileInterpreter oftype TextFileInterpreter {
+    }
+
+    block Exercise4CSVInterpreter oftype CSVInterpreter {
+        delimiter: ";";
+    }
+
+    block Exercise4ColumnDeleter oftype ColumnDeleter {
+        delete: [column F, column G, column H, column I, column L];
+    }
+
+    block Exercise4TableInterpreter oftype TableInterpreter {
+        header: false;
+        columns: [
+            "Geraet" oftype PositiveInteger,
+            "Hersteller" oftype text,
+            "Model" oftype text,
+            "Monat" oftype Month,
+            "Temperatur" oftype Celsius,
+            "Batterietemperatur" oftype Celsius,
+            "Geraet aktiv" oftype JaNein,
+        ];
+    }
+    
+    transform CelsiusToFahrenheit {
+        from Celsius oftype decimal;
+        to Fahrenheit oftype decimal;
+        Fahrenheit: (Celsius * 9/5) + 32;
+    }
+    block Exercise4CelsiusToFahrenheitTransformer oftype TableTransformer {
+        inputColumns: ['Temperatur'];
+        outputColumn: 'Temperatur';
+        use: CelsiusToFahrenheit;
+    }
+    block Exercise4CelsiusToFahrenheitTransformerForBattery oftype TableTransformer {
+        inputColumns: ['Batterietemperatur'];
+        outputColumn: 'Batterietemperatur';
+        use: CelsiusToFahrenheit;
+    }
+
+    block Exercise4SQLiteLoader oftype SQLiteLoader {
+		table: "temperatures";
+		file: "./temperatures.sqlite";
+	}
+}
